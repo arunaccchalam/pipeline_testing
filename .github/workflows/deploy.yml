@@ -1,0 +1,25 @@
+name: Deploy Pipeline
+
+on:
+  push:
+    branches:
+      - 'release/**'
+
+jobs:
+  deploy-atml:
+    runs-on: ubuntu-latest
+    environment: atml
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Salesforce CLI
+        run: npm install @salesforce/cli --global
+
+      - name: Authenticate to ATML
+        run: |
+          echo "${{ secrets.SFDX_AUTH_URL_ATML }}" > authFile.txt
+          sf org login sfdx-url --sfdx-url-file authFile.txt --alias atml
+          rm authFile.txt
+
+      - name: Deploy to ATML
+        run: sf project deploy start --target-org atml --source-dir force-app
